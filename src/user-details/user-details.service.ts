@@ -4,7 +4,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { Repository} from 'typeorm';
 import { CreateUserDetailDto } from './dto/create-user-detail.dto';
-import { UpdateUserDetailDto } from './dto/update-user-detail.dto';
 import { UserDetail } from './entities/user-detail.entity';
 
 const fetch = require('node-fetch');
@@ -12,62 +11,47 @@ const fetch = require('node-fetch');
 @Injectable()
 export class UserDetailsService {
 
-  constructor(@InjectRepository(UserDetail) private readonly userRepository: Repository<UserDetail  >, private readonly httpService : HttpService){}
+  constructor(@InjectRepository(UserDetail) private readonly userRepository: Repository<UserDetail  >){}
 
-  create(createUserDetailDto: CreateUserDetailDto) {
+  createInvoice = async(name:string, email:string, amt:string) => {
+    const url = 'https://api.commerce.coinbase.com/invoices';
+
+    const res = await axios.post(url, {
+        business_name: 'Shiba Pubg',
+        customer_email: email,
+        customer_name: name,
+        memo: '',
+        local_price: { amount: amt, currency: 'INR' },
+      },
+      {headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-CC-Api-Key': 'b6ee57a3-8ec8-434a-a62c-cc67e2f4d896',
+      }}
+    )
+
+    return res?.data?.data;
+  };
+
+
+  async create(createUserDetailDto: CreateUserDetailDto) {
 
     const user = this.userRepository.create(createUserDetailDto);
 
     this.userRepository.save(user);
 
-    this.createInvoice().then(res => console.log(res));
-
-    return "testing";
+    let success = false;
+    try {
+      const res = await this.createInvoice(user.name, user.email, user.amount);
+      console.log("RESPONSE: ", res?.hosted_url);
+      success = true
+      return {success, response: res?.hosted_url};
+    } catch (e) {
+      console.log('ERROR: ', e);
+      success = false
+      return {success, response: e};
+    }
     
   }
 
-
-  async createInvoice() {
-    const url = 'https://api.commerce.coinbase.com/invoices';
-    const options = {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        'X-CC-Api-Key': 'b6ee57a3-8ec8-434a-a62c-cc67e2f4d896'
-      },
-      body: JSON.stringify({
-        business_name: 'Crypto Accounting LLC',
-        customer_email: 'customer@test.com',
-        customer_name: 'Test Customer 2',
-        memo: 'Taxes and Accounting Services',
-        local_price: {amount: 1, currency: 'INR'}
-      })
-    };
-    let ress : any;
-    const res = fetch(url, options)
-      .then(res => res.json())
-      .then(json => console.log(json.data))
-      .then(data => ress = data)
-      .catch(err => console.error('error:' + err));
-      
-      await console.log("res :"+res);
-      console.log("ress :"+ress);
-  }
-
-  // findAll() {
-  //   return `This action returns all userDetails`;
-  // }
-
-  // findOne(id: number) {
-  //   return `This action returns a #${id} userDetail`;
-  // }
-
-  // update(id: number, updateUserDetailDto: UpdateUserDetailDto) {
-  //   return `This action updates a #${id} userDetail`;
-  // }
-
-  // remove(id: number) {
-  //   return `This action removes a #${id} userDetail`;
-  // }
 }

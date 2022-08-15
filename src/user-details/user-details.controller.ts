@@ -12,6 +12,11 @@ export class UserDetailsController {
     return this.userDetailsService.create(createUserDetailDto);
   }
 
+  // @Post("")
+  // webhook(@Body() createUserDetailDto: CreateUserDetailDto) {
+  //   return this.userDetailsService.create(createUserDetailDto);
+  // }
+
   // @Get()
   // findAll() {
   //   return this.userDetailsService.findAll();
