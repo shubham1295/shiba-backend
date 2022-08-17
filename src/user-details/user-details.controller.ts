@@ -12,6 +12,11 @@ export class UserDetailsController {
     return this.userDetailsService.create(createUserDetailDto);
   }
 
+  @Post("coinbaseWebhookHandler")
+  webHookHandler() {
+    return this.userDetailsService.webHookHandler();
+  }
+
   // @Post("")
   // webhook(@Body() createUserDetailDto: CreateUserDetailDto) {
   //   return this.userDetailsService.create(createUserDetailDto);
