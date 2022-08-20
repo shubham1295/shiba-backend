@@ -8,6 +8,6 @@ import { HttpModule } from '@nestjs/axios';
 @Module({
   imports: [TypeOrmModule.forFeature([UserDetail]), HttpModule],
   controllers: [UserDetailsController],
-  providers: [UserDetailsService]
+  providers: [UserDetailsService],
 })
 export class UserDetailsModule {}

@@ -1,44 +1,31 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Headers,
+  RawBodyRequest,
+  Req,
+} from '@nestjs/common';
 import { UserDetailsService } from './user-details.service';
 import { CreateUserDetailDto } from './dto/create-user-detail.dto';
-import { UpdateUserDetailDto } from './dto/update-user-detail.dto';
+import { RawBody } from 'src/Utils/utils';
+import { Request } from 'express';
 
 @Controller('user-details')
 export class UserDetailsController {
   constructor(private readonly userDetailsService: UserDetailsService) {}
 
-  @Post("create")
+  @Post('create')
   create(@Body() createUserDetailDto: CreateUserDetailDto) {
     return this.userDetailsService.create(createUserDetailDto);
   }
 
-  @Post("coinbaseWebhookHandler")
-  webHookHandler() {
-    return this.userDetailsService.webHookHandler();
+  @Post('coinbaseWebhookHandler')
+  webHookHandler(@Headers() headers, @Req() rawBody: RawBodyRequest<Request>) {
+    return this.userDetailsService.webHookHandler(headers, rawBody.rawBody);
   }
-
-  // @Post("")
-  // webhook(@Body() createUserDetailDto: CreateUserDetailDto) {
-  //   return this.userDetailsService.create(createUserDetailDto);
-  // }
-
-  // @Get()
-  // findAll() {
-  //   return this.userDetailsService.findAll();
-  // }
-
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.userDetailsService.findOne(+id);
-  // }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateUserDetailDto: UpdateUserDetailDto) {
-  //   return this.userDetailsService.update(+id, updateUserDetailDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.userDetailsService.remove(+id);
-  // }
 }
