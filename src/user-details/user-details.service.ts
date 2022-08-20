@@ -5,7 +5,9 @@ import axios from 'axios';
 import { Webhook } from 'coinbase-commerce-node';
 import { transferShibaPubg } from 'src/Utils/contact';
 import { Repository } from 'typeorm';
+import { ConfigDto } from './dto/config.dto';
 import { CreateUserDetailDto } from './dto/create-user-detail.dto';
+import { ConfigEntity } from './entities/config-entity';
 import { UserDetail } from './entities/user-detail.entity';
 
 @Injectable()
@@ -13,6 +15,8 @@ export class UserDetailsService {
   constructor(
     @InjectRepository(UserDetail)
     private readonly userRepository: Repository<UserDetail>,
+    @InjectRepository(ConfigEntity)
+    private readonly configDto: Repository<ConfigEntity>,
   ) {}
 
   createInvoice = async (name: string, email: string, amt: string) => {
@@ -39,6 +43,15 @@ export class UserDetailsService {
     return res?.data?.data;
   };
 
+  findBykey(key: string): Promise<ConfigDto | undefined> {
+    return this.configDto.findOne({ where: { key } });
+  }
+
+  getAmount() {
+    const configRes = this.findBykey('tokenPrice');
+    return configRes;
+  }
+
   async create(createUserDetailDto: CreateUserDetailDto) {
     const user = this.userRepository.create(createUserDetailDto);
 
@@ -57,7 +70,17 @@ export class UserDetailsService {
     }
   }
 
-  webHookHandler(header: string, rawbody: any) {
+  findByWalletAddress(
+    email: string,
+    price: string,
+  ): Promise<CreateUserDetailDto | undefined> {
+    return this.userRepository.findOne({
+      where: { email: email, amount: price },
+      order: { id: 'DESC' },
+    });
+  }
+
+  async webHookHandler(header: string, rawbody: any) {
     // console.log('Body : ', rawbody);
     var event;
     var webhookSecret = 'ebe5db70-46bd-4f91-97ae-afdbae286ff6';
@@ -75,10 +98,12 @@ export class UserDetailsService {
     }
 
     if (event.type == 'invoice:paid') {
-      const toAddress = '0x867e500d7a0e5944054B499bB1612a51E47f1253';
-
-      // transferShibaPubg(toAddress, 5);
-      console.log('PAID');
+      const data = await this.findByWalletAddress(
+        event.data.customer_email,
+        event.data.local_price.amount,
+      );
+      // console.log(data);
+      transferShibaPubg(data.address, Number(data.tokenAmount));
     }
 
     return 'Signed Webhook Received: ' + event.id;

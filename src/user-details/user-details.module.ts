@@ -4,9 +4,14 @@ import { UserDetailsController } from './user-details.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserDetail } from './entities/user-detail.entity';
 import { HttpModule } from '@nestjs/axios';
+import { ConfigEntity } from './entities/config-entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserDetail]), HttpModule],
+  imports: [
+    TypeOrmModule.forFeature([UserDetail]),
+    TypeOrmModule.forFeature([ConfigEntity]),
+    HttpModule,
+  ],
   controllers: [UserDetailsController],
   providers: [UserDetailsService],
 })

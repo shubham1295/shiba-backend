@@ -1,6 +1,6 @@
 const Tx = require('ethereumjs-tx').Transaction;
-// const web3 = require('web3');
-import Web3 from 'web3';
+const web3 = require('web3');
+// import Web3 from 'web3';
 import {
   contractABI,
   contractAddress,
@@ -13,8 +13,8 @@ import { AbiItem } from 'web3-utils';
 var count;
 
 //Infura HttpProvider Endpoint
-const web3js = new Web3(
-  new Web3.providers.HttpProvider(
+const web3js = new web3(
+  new web3.providers.HttpProvider(
     'https://rinkeby.infura.io/v3/b358549d97e44fb8b54e17089a9339b5',
   ),
 );
@@ -27,12 +27,12 @@ export const transferShibaPubg = (toAddress: string, amt: number) => {
 
   // get transaction count, later will used as nonce
   web3js.eth.getTransactionCount(myAddress).then(function (v) {
-    console.log('Count: ' + v);
+    // console.log('Count: ' + v);
     count = v;
 
     var amount = web3js.utils.toHex(amt * 1e18);
 
-    console.log(amount);
+    // console.log(amount);
     // creating raw tranaction
     var rawTransaction = {
       from: myAddress,
@@ -56,11 +56,11 @@ export const transferShibaPubg = (toAddress: string, amt: number) => {
       .sendSignedTransaction('0x' + transaction.serialize().toString('hex'))
       .on('transactionHash', console.log);
 
-    contract.methods
-      .balanceOf(myAddress)
-      .call()
-      .then(function (balance) {
-        console.log(Web3.utils.fromWei(balance, 'finney'));
-      });
+    // contract.methods
+    //   .balanceOf(myAddress)
+    //   .call()
+    // .then(function (balance) {
+    //   console.log(web3.utils.fromWei(balance, 'finney'));
+    // });
   });
 };

@@ -19,6 +19,11 @@ import { Request } from 'express';
 export class UserDetailsController {
   constructor(private readonly userDetailsService: UserDetailsService) {}
 
+  @Get()
+  getAmount() {
+    return this.userDetailsService.getAmount();
+  }
+
   @Post('create')
   create(@Body() createUserDetailDto: CreateUserDetailDto) {
     return this.userDetailsService.create(createUserDetailDto);
