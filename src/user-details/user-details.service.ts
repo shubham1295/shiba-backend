@@ -1,8 +1,8 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
 import { Webhook } from 'coinbase-commerce-node';
+import { coinbaseInvoiceApi, localCurrency } from 'src/Utils/constants';
 import { transferShibaPubg } from 'src/Utils/contact';
 import { Repository } from 'typeorm';
 import { ConfigDto } from './dto/config.dto';
@@ -20,22 +20,20 @@ export class UserDetailsService {
   ) {}
 
   createInvoice = async (name: string, email: string, amt: string) => {
-    const url = 'https://api.commerce.coinbase.com/invoices';
-
     const res = await axios.post(
-      url,
+      coinbaseInvoiceApi,
       {
         business_name: 'Shiba Pubg',
         customer_email: email,
         customer_name: name,
         memo: '',
-        local_price: { amount: amt, currency: 'INR' },
+        local_price: { amount: amt, currency: localCurrency },
       },
       {
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
-          'X-CC-Api-Key': 'b6ee57a3-8ec8-434a-a62c-cc67e2f4d896',
+          'X-CC-Api-Key': process.env.COINBASE_API_KEY,
         },
       },
     );
@@ -53,6 +51,7 @@ export class UserDetailsService {
   }
 
   async create(createUserDetailDto: CreateUserDetailDto) {
+    console.log('HERE');
     const user = this.userRepository.create(createUserDetailDto);
 
     this.userRepository.save(user);
@@ -60,7 +59,7 @@ export class UserDetailsService {
     let success = false;
     try {
       const res = await this.createInvoice(user.name, user.email, user.amount);
-      console.log('RESPONSE: ', res?.hosted_url);
+      // console.log('RESPONSE: ', res?.hosted_url);
       success = true;
       return { success, response: res?.hosted_url };
     } catch (e) {
@@ -83,7 +82,7 @@ export class UserDetailsService {
   async webHookHandler(header: string, rawbody: any) {
     // console.log('Body : ', rawbody);
     var event;
-    var webhookSecret = 'ebe5db70-46bd-4f91-97ae-afdbae286ff6';
+    var webhookSecret = process.env.COINBASE_WEBHOOK_SECRET;
     try {
       event = Webhook.verifyEventBody(
         rawbody,
@@ -92,20 +91,20 @@ export class UserDetailsService {
       );
       console.log('Event : ', event);
     } catch (error) {
-      console.log('Error occured', error.message);
+      console.log('Error occured', error?.message);
 
-      return 'Webhook Error:' + error.message;
+      return 'Webhook Error:' + error?.message;
     }
 
-    if (event.type == 'invoice:paid') {
+    if (event?.type == 'invoice:paid') {
       const data = await this.findByWalletAddress(
-        event.data.customer_email,
-        event.data.local_price.amount,
+        event?.data?.customer_email,
+        event?.data?.local_price.amount,
       );
       // console.log(data);
-      transferShibaPubg(data.address, Number(data.tokenAmount));
+      transferShibaPubg(data?.address, Number(data?.tokenAmount));
     }
 
-    return 'Signed Webhook Received: ' + event.id;
+    return 'Signed Webhook Received: ' + event?.id;
   }
 }

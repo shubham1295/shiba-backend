@@ -1,7 +1,9 @@
 const Tx = require('ethereumjs-tx').Transaction;
 const web3 = require('web3');
-// import Web3 from 'web3';
+import Common from 'ethereumjs-common';
+
 import {
+  chainUrl,
   contractABI,
   contractAddress,
   myAddress,
@@ -12,18 +14,18 @@ import { AbiItem } from 'web3-utils';
 
 var count;
 
-//Infura HttpProvider Endpoint
-const web3js = new web3(
-  new web3.providers.HttpProvider(
-    'https://rinkeby.infura.io/v3/b358549d97e44fb8b54e17089a9339b5',
-  ),
-);
-
 export const transferShibaPubg = (toAddress: string, amt: number) => {
+  //Alchemy HttpProvider Endpoint
+  const web3js = new web3(
+    new web3.providers.HttpProvider(process.env.CHAIN_URL_TESTNET),
+  );
+
   var contract = new web3js.eth.Contract(
     contractABI as AbiItem[],
     contractAddress,
   );
+
+  // console.log(myAddress);
 
   // get transaction count, later will used as nonce
   web3js.eth.getTransactionCount(myAddress).then(function (v) {
@@ -31,7 +33,6 @@ export const transferShibaPubg = (toAddress: string, amt: number) => {
     count = v;
 
     var amount = web3js.utils.toHex(amt * 1e18);
-
     // console.log(amount);
     // creating raw tranaction
     var rawTransaction = {
@@ -45,9 +46,19 @@ export const transferShibaPubg = (toAddress: string, amt: number) => {
     };
     console.log(rawTransaction);
     //creating tranaction via ethereumjs-tx
+
+    const common = Common.forCustomChain(
+      'mainnet',
+      {
+        name: 'matic-mumbai', //polygon-mainnet
+        networkId: 80001, //137
+        chainId: 80001, //137
+      },
+      'petersburg',
+    );
+
     const transaction = new Tx(rawTransaction, {
-      chain: 'rinkeby',
-      hardfork: 'petersburg',
+      common,
     });
     //signing transaction with private key
     transaction.sign(privateKey);

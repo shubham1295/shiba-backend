@@ -1,14 +1,20 @@
+export const coinbaseInvoiceApi = 'https://api.commerce.coinbase.com/invoices';
+export const localCurrency = 'INR';
 //sender address
 export const myAddress = '0xBC8c8F636161702dfb64CA316D298020753989e2';
+//contract address
+export const contractAddress = '0xFf3A3BE467346fA75c93B72a191e035BfD17fD21';
+
 //sender private key
 export const privateKey = Buffer.from(
   'ee39d69ee719c90e96d482c6b5c054a9c8aaa99f6563b228dfec76d05f3a181c',
   'hex',
 );
-//receiver address
-// export const toAddress = '0x867e500d7a0e5944054B499bB1612a51E47f1253';
-//contract address
-export const contractAddress = '0x987B4636901Ca37f49Fd8b671780C9137548bd48';
+
+export const chainUrl = {
+  mainnet: process.env.CHAIN_URL_MAINNET,
+  testnet: process.env.CHAIN_URL_TESTNET,
+};
 
 //contract ABI
 export const contractABI = [
