@@ -1,5 +1,5 @@
 export const coinbaseInvoiceApi = 'https://api.commerce.coinbase.com/invoices';
-export const localCurrency = 'INR';
+export const localCurrency = 'USD';
 //sender address
 export const myAddress = '0xBC8c8F636161702dfb64CA316D298020753989e2';
 //contract address
