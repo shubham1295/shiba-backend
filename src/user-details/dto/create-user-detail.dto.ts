@@ -4,4 +4,7 @@ export class CreateUserDetailDto {
   address: string;
   amount: string;
   tokenAmount: string;
+  txnId: string;
+  phone: string;
+  paymentMode: string;
 }

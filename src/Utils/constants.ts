@@ -1,5 +1,8 @@
 export const coinbaseInvoiceApi = 'https://api.commerce.coinbase.com/invoices';
-export const localCurrency = 'USD';
+export const payUApi = 'https://secure.payu.in/_payment';
+export const payUApiSalt = 'ILeeR7bBiwzjZPIpjtdsWWkmngCfC4Hk';
+export const payUApiMerchantKey = 'tFs6Ep';
+export const localCurrency = 'INR';
 //sender address
 export const myAddress = '0xBC8c8F636161702dfb64CA316D298020753989e2';
 //contract address

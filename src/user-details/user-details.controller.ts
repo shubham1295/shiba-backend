@@ -29,6 +29,16 @@ export class UserDetailsController {
     return this.userDetailsService.create(createUserDetailDto);
   }
 
+  @Post('payCrypto')
+  payCrypto(@Body() createUserDetailDto: CreateUserDetailDto) {
+    return this.userDetailsService.payCrypto(createUserDetailDto);
+  }
+
+  @Post('payBank')
+  payBank(@Body() createUserDetailDto: CreateUserDetailDto) {
+    return this.userDetailsService.payBank(createUserDetailDto);
+  }
+
   @Post('coinbaseWebhookHandler')
   webHookHandler(@Headers() headers, @Req() rawBody: RawBodyRequest<Request>) {
     return this.userDetailsService.webHookHandler(headers, rawBody.rawBody);

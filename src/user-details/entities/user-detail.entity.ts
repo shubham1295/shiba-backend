@@ -21,4 +21,15 @@ export class UserDetail {
 
   @Column()
   tokenAmount: string;
+
+  @Column()
+  txnId: string;
+
+  @Column()
+  phone: string;
+
+  @Column({
+    nullable: true,
+  })
+  paymentMode: string;
 }
