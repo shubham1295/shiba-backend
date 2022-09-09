@@ -130,33 +130,33 @@ export class UserDetailsService {
     return configRes;
   }
 
-  async create(createUserDetailDto: CreateUserDetailDto) {
-    const txnId: string = uuid();
-    createUserDetailDto.txnId = txnId;
-    let success = false;
-    try {
-      const user = this.userRepository.create(createUserDetailDto);
-      this.userRepository.save(user);
-      success = true;
-      return { success, response: 'User Created' };
-    } catch (e) {
-      console.log('ERROR in create: ', e);
-      success = false;
-      return { success, response: e };
-    }
-  }
+  // async create(createUserDetailDto: CreateUserDetailDto) {
+  //   const txnId: string = uuid();
+  //   createUserDetailDto.txnId = txnId;
+  //   let success = false;
+  //   try {
+  //     const user = this.userRepository.create(createUserDetailDto);
+  //     this.userRepository.save(user);
+  //     success = true;
+  //     return { success, response: 'User Created' };
+  //   } catch (e) {
+  //     console.log('ERROR in create: ', e);
+  //     success = false;
+  //     return { success, response: e };
+  //   }
+  // }
 
   async payCrypto(createUserDetailDto: CreateUserDetailDto) {
-    const user = await this.findByUserByEmail(createUserDetailDto.email);
-
     let success = false;
     try {
+      const txnId: string = uuid();
+      createUserDetailDto.txnId = txnId;
+      const user = this.userRepository.create(createUserDetailDto);
       user.paymentMode = 'Crypto';
       this.userRepository.save(user);
       const res = await this.createInvoice(user.name, user.email, user.amount);
-      // console.log('RESPONSE: ', res?.hosted_url);
       success = true;
-      return { success, response: 'res?.hosted_url' };
+      return { success, response: res?.hosted_url };
     } catch (e) {
       console.log('ERROR in payCrypto: ', e);
       success = false;
@@ -165,13 +165,14 @@ export class UserDetailsService {
   }
 
   async payBank(createUserDetailDto: CreateUserDetailDto) {
-    // console.log('HERE');
-    const user = await this.findByUserByEmail(createUserDetailDto.email);
-
     let success = false;
     try {
+      const txnId: string = uuid();
+      createUserDetailDto.txnId = txnId;
+      const user = this.userRepository.create(createUserDetailDto);
+      user.paymentMode = 'Bank';
+      this.userRepository.save(user);
       const res = await this.payuPayment(user);
-      // console.log('RESPONSE: ', res?.hosted_url);
       success = true;
       return res;
     } catch (e) {

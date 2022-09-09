@@ -24,10 +24,10 @@ export class UserDetailsController {
     return this.userDetailsService.getAmount();
   }
 
-  @Post('create')
-  create(@Body() createUserDetailDto: CreateUserDetailDto) {
-    return this.userDetailsService.create(createUserDetailDto);
-  }
+  // @Post('create')
+  // create(@Body() createUserDetailDto: CreateUserDetailDto) {
+  //   return this.userDetailsService.create(createUserDetailDto);
+  // }
 
   @Post('payCrypto')
   payCrypto(@Body() createUserDetailDto: CreateUserDetailDto) {

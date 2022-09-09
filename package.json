@@ -28,8 +28,6 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/typeorm": "^9.0.1",
-    "@types/crypto-js": "^4.1.1",
-    "@types/js-sha512": "^0.8.0",
     "axios": "^0.27.2",
     "coinbase-commerce-node": "^1.0.4",
     "ethereumjs-tx": "^2.1.2",
