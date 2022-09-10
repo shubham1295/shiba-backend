@@ -17,6 +17,10 @@ import { ConfigEntity } from './entities/config-entity';
 import { UserDetail } from './entities/user-detail.entity';
 import { v4 as uuid } from 'uuid';
 import { createHash } from 'crypto';
+import { NestFactory } from '@nestjs/core/nest-factory';
+import { NestExpressApplication } from '@nestjs/platform-express/interfaces/nest-express-application.interface';
+import { AppModule } from 'src/app.module';
+import { join } from 'path';
 
 @Injectable()
 export class UserDetailsService {
@@ -174,7 +178,7 @@ export class UserDetailsService {
       this.userRepository.save(user);
       const res = await this.payuPayment(user);
       success = true;
-      return res;
+      return { success, response: res };
     } catch (e) {
       console.log('ERROR in payBank: ', e);
       success = false;
@@ -209,5 +213,11 @@ export class UserDetailsService {
     }
 
     return 'Signed Webhook Received: ' + event?.id;
+  }
+
+  async successPage(test: any) {
+    if (test.error === 'E000') {
+      const data = await this.findByEmailAndPrice(test.email, test.amount);
+    }
   }
 }

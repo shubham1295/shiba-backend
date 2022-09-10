@@ -9,6 +9,8 @@ import {
   Headers,
   RawBodyRequest,
   Req,
+  Render,
+  Res,
 } from '@nestjs/common';
 import { UserDetailsService } from './user-details.service';
 import { CreateUserDetailDto } from './dto/create-user-detail.dto';
@@ -24,9 +26,9 @@ export class UserDetailsController {
     return this.userDetailsService.getAmount();
   }
 
-  // @Post('create')
+  // @Get('create')
   // create(@Body() createUserDetailDto: CreateUserDetailDto) {
-  //   return this.userDetailsService.create(createUserDetailDto);
+  //   console.log('testig');
   // }
 
   @Post('payCrypto')
@@ -42,5 +44,10 @@ export class UserDetailsController {
   @Post('coinbaseWebhookHandler')
   webHookHandler(@Headers() headers, @Req() rawBody: RawBodyRequest<Request>) {
     return this.userDetailsService.webHookHandler(headers, rawBody.rawBody);
+  }
+
+  @Post('successPage')
+  successPage(@Body() test: any) {
+    return this.userDetailsService.successPage(test);
   }
 }
