@@ -221,7 +221,6 @@ export class UserDetailsService {
         const hash = transferShibaPubg(
           data?.address,
           Number(data?.tokenAmount),
-          data,
         );
         if (hash !== null) {
           data.tokenTransfered = 'done';
@@ -244,7 +243,6 @@ export class UserDetailsService {
           const hash = await transferShibaPubg(
             data?.address,
             Number(data?.tokenAmount),
-            data,
           );
           console.log(hash);
           if (hash !== null && hash !== undefined) {
