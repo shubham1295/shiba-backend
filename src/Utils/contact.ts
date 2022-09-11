@@ -28,7 +28,7 @@ export const transferShibaPubg = (toAddress: string, amt: number) => {
   // console.log(myAddress);
 
   // get transaction count, later will used as nonce
-  web3js.eth.getTransactionCount(myAddress).then(function (v) {
+  web3js.eth.getTransactionCount(myAddress).then(async function (v) {
     // console.log('Count: ' + v);
     count = v;
 
@@ -63,9 +63,17 @@ export const transferShibaPubg = (toAddress: string, amt: number) => {
     //signing transaction with private key
     transaction.sign(privateKey);
     //sending transacton via web3js module
-    web3js.eth
-      .sendSignedTransaction('0x' + transaction.serialize().toString('hex'))
-      .on('transactionHash', console.log);
+    const transactionHash = await web3js.eth.sendSignedTransaction(
+      '0x' + transaction.serialize().toString('hex'),
+    ); // .on('transactionHash', console.log);
+    console.log(transactionHash);
+
+    if (transactionHash?.status === true) {
+      console.log('transactionHash status true');
+      return transactionHash?.transactionHash;
+    } else {
+      return null;
+    }
 
     // contract.methods
     //   .balanceOf(myAddress)

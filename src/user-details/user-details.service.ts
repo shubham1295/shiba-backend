@@ -184,7 +184,7 @@ export class UserDetailsService {
       this.userRepository.save(user);
       const res = await this.payuPayment(user);
       success = true;
-      return { success, response: res };
+      return res;
     } catch (e) {
       console.log('ERROR in payBank: ', e);
       success = false;
@@ -217,7 +217,17 @@ export class UserDetailsService {
       data.paid = 'done';
       this.userRepository.save(data);
       // console.log(data);
-      transferShibaPubg(data?.address, Number(data?.tokenAmount));
+      if (data.tokenTransfered !== 'done') {
+        const hash = transferShibaPubg(
+          data?.address,
+          Number(data?.tokenAmount),
+          data,
+        );
+        if (hash !== null) {
+          data.tokenTransfered = 'done';
+          this.userRepository.save(data);
+        }
+      }
     }
 
     return 'Signed Webhook Received: ' + event?.id;
@@ -230,8 +240,19 @@ export class UserDetailsService {
         data.paid = 'done';
         this.userRepository.save(data);
         if (data?.tokenTransfered !== 'done') {
-          console.log(data);
-          // transferShibaPubg(data?.address, Number(data?.tokenAmount));
+          // console.log(data);
+          const hash = await transferShibaPubg(
+            data?.address,
+            Number(data?.tokenAmount),
+            data,
+          );
+          console.log(hash);
+          if (hash !== null && hash !== undefined) {
+            console.log('inside');
+            data.tokenTransfered = 'done';
+            this.userRepository.save(data);
+          }
+
           return 'Success';
         }
       } else {
