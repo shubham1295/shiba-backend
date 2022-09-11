@@ -32,4 +32,14 @@ export class UserDetail {
     nullable: true,
   })
   paymentMode: string;
+
+  @Column({
+    nullable: true,
+  })
+  paid: string;
+
+  @Column({
+    nullable: true,
+  })
+  tokenTransfered: string;
 }

@@ -129,6 +129,12 @@ export class UserDetailsService {
     });
   }
 
+  findBytxnId(txnId: string): Promise<CreateUserDetailDto | undefined> {
+    return this.userRepository.findOne({
+      where: { txnId: txnId },
+    });
+  }
+
   getAmount() {
     const configRes = this.findBykey('tokenPrice');
     return configRes;
@@ -174,7 +180,7 @@ export class UserDetailsService {
       const txnId: string = uuid();
       createUserDetailDto.txnId = txnId;
       const user = this.userRepository.create(createUserDetailDto);
-      user.paymentMode = 'Bank';
+      user.paymentMode = 'payU';
       this.userRepository.save(user);
       const res = await this.payuPayment(user);
       success = true;
@@ -208,6 +214,8 @@ export class UserDetailsService {
         event?.data?.customer_email,
         event?.data?.local_price.amount,
       );
+      data.paid = 'done';
+      this.userRepository.save(data);
       // console.log(data);
       transferShibaPubg(data?.address, Number(data?.tokenAmount));
     }
@@ -215,9 +223,21 @@ export class UserDetailsService {
     return 'Signed Webhook Received: ' + event?.id;
   }
 
-  async successPage(test: any) {
-    if (test.error === 'E000') {
-      const data = await this.findByEmailAndPrice(test.email, test.amount);
+  async successPage(req: any) {
+    if (req?.status === 'success' && req?.error === 'E000') {
+      const data = await this.findBytxnId(req?.txnid);
+      if (null !== data) {
+        data.paid = 'done';
+        this.userRepository.save(data);
+        if (data?.tokenTransfered !== 'done') {
+          console.log(data);
+          // transferShibaPubg(data?.address, Number(data?.tokenAmount));
+          return 'Success';
+        }
+      } else {
+        console.log('No user');
+        return 'No User Found';
+      }
     }
   }
 }

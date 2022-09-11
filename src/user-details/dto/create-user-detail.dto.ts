@@ -7,4 +7,6 @@ export class CreateUserDetailDto {
   txnId: string;
   phone: string;
   paymentMode: string;
+  paid: string;
+  tokenTransfered: string;
 }

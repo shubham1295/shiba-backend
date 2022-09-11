@@ -11,11 +11,12 @@ import {
   Req,
   Render,
   Res,
+  Redirect,
 } from '@nestjs/common';
 import { UserDetailsService } from './user-details.service';
 import { CreateUserDetailDto } from './dto/create-user-detail.dto';
 import { RawBody } from 'src/Utils/utils';
-import { Request } from 'express';
+import e, { Request } from 'express';
 
 @Controller('user-details')
 export class UserDetailsController {
@@ -25,11 +26,6 @@ export class UserDetailsController {
   getAmount() {
     return this.userDetailsService.getAmount();
   }
-
-  // @Get('create')
-  // create(@Body() createUserDetailDto: CreateUserDetailDto) {
-  //   console.log('testig');
-  // }
 
   @Post('payCrypto')
   payCrypto(@Body() createUserDetailDto: CreateUserDetailDto) {
@@ -47,7 +43,29 @@ export class UserDetailsController {
   }
 
   @Post('successPage')
-  successPage(@Body() test: any) {
-    return this.userDetailsService.successPage(test);
+  @Redirect()
+  successPage(@Body() req: any, @Res() res: Response) {
+    // let url: boolean = false;
+    this.userDetailsService.successPage(req);
+    const t: string = 'fail';
+
+    let test: string = 'https://google.com/';
+    const u = test + t;
+    return { url: u };
+  }
+
+  @Post('failPage')
+  @Redirect()
+  failPage(@Body() req: any, @Res() res: Response) {
+    console.log(req);
+    // // let url: boolean = false;
+    // this.userDetailsService.successPage(req).then((val) => {
+    //   // url = val === 'Success' ? true : false;
+    // });
+    // const t: string = 'fail';
+
+    // let test: string = 'https://google.com/';
+    // const u = test + t;
+    // return { url: u };
   }
 }
