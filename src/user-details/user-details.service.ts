@@ -54,53 +54,67 @@ export class UserDetailsService {
   };
 
   async payuPayment(user: CreateUserDetailDto) {
-    var productInfo: string = user.tokenAmount + ' Shiba Pubg Token';
-    var value: string =
-      payUApiMerchantKey +
-      '|' +
-      user.txnId +
-      '|' +
-      user.amount +
-      '|' +
-      productInfo +
-      '|' +
-      user.name +
-      '|' +
-      user.email +
-      '|||||||||||' +
-      payUApiSalt;
-    // var hash = sha512.hmac.update(payUApiSalt, value);
-    var hash = createHash('sha512');
-    hash.update(value);
-
+    // console.log(user);
     // console.log(hash.digest('hex'));
 
     try {
-      const res = await axios.post(
-        payUApi,
-        {
-          key: payUApiMerchantKey,
-          txnid: user.txnId,
-          amount: user.amount,
-          productinfo: productInfo,
-          firstname: user.name,
-          email: user.email,
-          phone: user.phone,
-          surl: 'https://apiplayground-response.herokuapp.com/',
-          furl: 'https://apiplayground-response.herokuapp.com/',
-          hash: hash.digest('hex'),
-        },
-        {
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      );
+      var productInfo: string = user.tokenAmount + ' Shiba Pubg Token';
+      var value: string =
+        payUApiMerchantKey +
+        '|' +
+        user.txnId +
+        '|' +
+        user.amount +
+        '|' +
+        productInfo +
+        '|' +
+        user.name +
+        '|' +
+        user.email +
+        '|||||||||||' +
+        payUApiSalt;
 
+      var hash = createHash('sha512');
+      hash.update(value);
+
+      // const res = await axios.post(
+      //   payUApi,
+      //   {
+      //     key: payUApiMerchantKey,
+      //     txnid: user.txnId,
+      //     amount: user.amount,
+      //     productinfo: productInfo,
+      //     firstname: user.name,
+      //     email: user.email,
+      //     phone: user.phone,
+      //     surl: 'https://apiplayground-response.herokuapp.com/',
+      //     furl: 'https://apiplayground-response.herokuapp.com/',
+      //     hash: hash.digest('hex'),
+      //   },
+      //   {
+      //     headers: {
+      //       Accept: 'application/json',
+      //       'Content-Type': 'multipart/form-data',
+      //     },
+      //   },
+      // );
       // console.log(res);
+      // return res?.data;
 
-      return res?.data;
+      const json = `{
+      "key" : "${payUApiMerchantKey}",
+      "txnId": "${user.txnId}",
+      "amount": "${user.amount}",
+      "prodInfo": "${productInfo}",
+      "name": "${user.name}",
+      "email": "${user.email}",
+      "hash": "${hash.digest('hex')}",
+      "surl": "https://apiplayground-response.herokuapp.com/",
+      "furl": "https://apiplayground-response.herokuapp.com/"
+    }`;
+
+      let success = true;
+      return { success, response: JSON.parse(json) };
     } catch (e) {
       console.log('ERROR in payuPayment: ', e);
       let success = false;
