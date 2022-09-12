@@ -109,8 +109,8 @@ export class UserDetailsService {
       "name": "${user.name}",
       "email": "${user.email}",
       "hash": "${hash.digest('hex')}",
-      "surl": "https://apiplayground-response.herokuapp.com/",
-      "furl": "https://apiplayground-response.herokuapp.com/"
+      "surl": "https://shiba-pubg-ui.vercel.app/successPayment.html",
+      "furl": "https://shiba-pubg-ui.vercel.app/failedPayment.html"
     }`;
 
       let success = true;
