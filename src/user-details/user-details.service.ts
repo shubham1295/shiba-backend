@@ -109,8 +109,8 @@ export class UserDetailsService {
       "name": "${user.name}",
       "email": "${user.email}",
       "hash": "${hash.digest('hex')}",
-      "surl": "https://shiba-pubg-ui.vercel.app/successPayment.html",
-      "furl": "https://shiba-pubg-ui.vercel.app/failedPayment.html"
+      "surl": "https://shibapubg.herokuapp.com/successPage",
+      "furl": "https://shibapubg.herokuapp.com/failPage"
     }`;
 
       let success = true;
@@ -172,15 +172,42 @@ export class UserDetailsService {
 
   async payCrypto(createUserDetailDto: CreateUserDetailDto) {
     let success = false;
+    if (
+      createUserDetailDto.tokenAmount === null ||
+      createUserDetailDto.tokenAmount === '' ||
+      createUserDetailDto.tokenAmount === '0'
+    ) {
+      return { success, false: 'Token amount is not proper' };
+    }
     try {
-      const txnId: string = uuid();
-      createUserDetailDto.txnId = txnId;
-      const user = this.userRepository.create(createUserDetailDto);
-      user.paymentMode = 'Crypto';
-      this.userRepository.save(user);
-      const res = await this.createInvoice(user.name, user.email, user.amount);
-      success = true;
-      return { success, response: res?.hosted_url };
+      const currencyRes = await axios.get(
+        'https://api.exchangerate.host/convert?from=USD&to=INR',
+      );
+      if (currencyRes.data.success === true) {
+        const rate = currencyRes.data.result;
+        // console.log(
+        //   'INR : ' + (Number(createUserDetailDto.amount) * rate).toFixed(2),
+        // );
+
+        createUserDetailDto.amount = (
+          Number(createUserDetailDto.amount) * rate
+        ).toFixed(2);
+        const txnId: string = uuid();
+        createUserDetailDto.txnId = txnId;
+        const user = this.userRepository.create(createUserDetailDto);
+        user.paymentMode = 'Crypto';
+        this.userRepository.save(user);
+        const res = await this.createInvoice(
+          user.name,
+          user.email,
+          user.amount,
+        );
+        success = true;
+        return { success, response: res?.hosted_url };
+      } else {
+        success = false;
+        return { success, response: 'Currency Conversion Failed' };
+      }
     } catch (e) {
       console.log('ERROR in payCrypto: ', e);
       success = false;
@@ -190,15 +217,38 @@ export class UserDetailsService {
 
   async payBank(createUserDetailDto: CreateUserDetailDto) {
     let success = false;
+    if (
+      createUserDetailDto.tokenAmount === null ||
+      createUserDetailDto.tokenAmount === '' ||
+      createUserDetailDto.tokenAmount === '0'
+    ) {
+      return { success, false: 'Token amount is not proper' };
+    }
     try {
-      const txnId: string = uuid();
-      createUserDetailDto.txnId = txnId;
-      const user = this.userRepository.create(createUserDetailDto);
-      user.paymentMode = 'payU';
-      this.userRepository.save(user);
-      const res = await this.payuPayment(user);
-      success = true;
-      return res;
+      const currencyRes = await axios.get(
+        'https://api.exchangerate.host/convert?from=USD&to=INR',
+      );
+      if (currencyRes.data.success === true) {
+        const rate = currencyRes.data.result;
+        // console.log(
+        //   'INR : ' + (Number(createUserDetailDto.amount) * rate).toFixed(2),
+        // );
+
+        createUserDetailDto.amount = (
+          Number(createUserDetailDto.amount) * rate
+        ).toFixed(2);
+        const txnId: string = uuid();
+        createUserDetailDto.txnId = txnId;
+        const user = this.userRepository.create(createUserDetailDto);
+        user.paymentMode = 'payU';
+        this.userRepository.save(user);
+        const res = await this.payuPayment(user);
+        success = true;
+        return res;
+      } else {
+        success = false;
+        return { success, response: 'Currency Conversion Failed' };
+      }
     } catch (e) {
       console.log('ERROR in payBank: ', e);
       success = false;
@@ -230,16 +280,17 @@ export class UserDetailsService {
       );
       data.paid = 'done';
       this.userRepository.save(data);
-      // console.log(data);
-      if (data.tokenTransfered !== 'done') {
-        const hash = transferShibaPubg(
-          data?.address,
-          Number(data?.tokenAmount),
+
+      if (data?.tokenTransfered !== 'done') {
+        await transferShibaPubg(data?.address, Number(data?.tokenAmount)).then(
+          (r) => {
+            console.log('hash : ' + r);
+            if (r !== null && r !== undefined) {
+              data.tokenTransfered = 'done';
+              this.userRepository.save(data);
+            }
+          },
         );
-        if (hash !== null) {
-          data.tokenTransfered = 'done';
-          this.userRepository.save(data);
-        }
       }
     }
 
@@ -253,19 +304,19 @@ export class UserDetailsService {
         data.paid = 'done';
         this.userRepository.save(data);
         if (data?.tokenTransfered !== 'done') {
-          // console.log(data);
-          const hash = await transferShibaPubg(
+          const result = await transferShibaPubg(
             data?.address,
             Number(data?.tokenAmount),
-          );
-          console.log(hash);
-          if (hash !== null && hash !== undefined) {
-            console.log('inside');
-            data.tokenTransfered = 'done';
-            this.userRepository.save(data);
-          }
+          ).then((r) => {
+            console.log('hash : ' + r);
+            if (r !== null && r !== undefined) {
+              data.tokenTransfered = 'done';
+              this.userRepository.save(data);
+              return 'Success';
+            }
+          });
 
-          return 'Success';
+          return result;
         }
       } else {
         console.log('No user');

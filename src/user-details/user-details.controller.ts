@@ -44,28 +44,22 @@ export class UserDetailsController {
 
   @Post('successPage')
   @Redirect()
-  successPage(@Body() req: any, @Res() res: Response) {
-    // let url: boolean = false;
-    this.userDetailsService.successPage(req);
-    const t: string = 'fail';
+  async successPage(@Body() req: any, @Res() res: Response) {
+    const e = await this.userDetailsService.successPage(req).then((rsp) => {
+      console.log('49 :' + rsp);
+      return rsp;
+    });
 
-    let test: string = 'https://google.com/';
-    const u = test + t;
-    return { url: u };
+    if (e === 'Success') {
+      return { url: 'https://shiba-pubg-ui.vercel.app/successPayment.html' };
+    } else {
+      return { url: 'https://shiba-pubg-ui.vercel.app/failedPayment.html' };
+    }
   }
 
   @Post('failPage')
   @Redirect()
   failPage(@Body() req: any, @Res() res: Response) {
-    console.log(req);
-    // // let url: boolean = false;
-    // this.userDetailsService.successPage(req).then((val) => {
-    //   // url = val === 'Success' ? true : false;
-    // });
-    // const t: string = 'fail';
-
-    // let test: string = 'https://google.com/';
-    // const u = test + t;
-    // return { url: u };
+    return { url: 'https://shiba-pubg-ui.vercel.app/failedPayment.html' };
   }
 }

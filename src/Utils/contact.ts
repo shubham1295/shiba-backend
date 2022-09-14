@@ -11,10 +11,14 @@ import {
   //   toAddress,
 } from './constants';
 import { AbiItem } from 'web3-utils';
+import { resolve } from 'dns/promises';
 
 var count;
 
-export const transferShibaPubg = (toAddress: string, amt: number) => {
+export const transferShibaPubg = (
+  toAddress: string,
+  amt: number,
+): Promise<string> => {
   //Alchemy HttpProvider Endpoint
   const web3js = new web3(
     new web3.providers.HttpProvider(process.env.CHAIN_URL_TESTNET),
@@ -24,62 +28,69 @@ export const transferShibaPubg = (toAddress: string, amt: number) => {
     contractABI as AbiItem[],
     contractAddress,
   );
+  let hash: any = web3js.eth
+    .getTransactionCount(myAddress)
+    .then(async function (v) {
+      // console.log('Count: ' + v);
+      count = v;
 
-  // console.log(myAddress);
+      var amount = web3js.utils.toHex(amt * 1e18);
+      // console.log(amount);
+      // creating raw tranaction
+      var rawTransaction = {
+        from: myAddress,
+        gasPrice: web3js.utils.toHex(20 * 1e9),
+        gasLimit: web3js.utils.toHex(210000),
+        to: contractAddress,
+        value: '0x0',
+        data: contract.methods.transfer(toAddress, amount).encodeABI(),
+        nonce: web3js.utils.toHex(count),
+      };
+      console.log(rawTransaction);
+      //creating tranaction via ethereumjs-tx
 
-  // get transaction count, later will used as nonce
-  web3js.eth.getTransactionCount(myAddress).then(async function (v) {
-    // console.log('Count: ' + v);
-    count = v;
+      const common = Common.forCustomChain(
+        'mainnet',
+        {
+          name: 'matic-mumbai', //polygon-mainnet
+          networkId: 80001, //137
+          chainId: 80001, //137
+        },
+        'petersburg',
+      );
 
-    var amount = web3js.utils.toHex(amt * 1e18);
-    // console.log(amount);
-    // creating raw tranaction
-    var rawTransaction = {
-      from: myAddress,
-      gasPrice: web3js.utils.toHex(20 * 1e9),
-      gasLimit: web3js.utils.toHex(210000),
-      to: contractAddress,
-      value: '0x0',
-      data: contract.methods.transfer(toAddress, amount).encodeABI(),
-      nonce: web3js.utils.toHex(count),
-    };
-    console.log(rawTransaction);
-    //creating tranaction via ethereumjs-tx
+      const transaction = new Tx(rawTransaction, {
+        common,
+      });
+      //signing transaction with private key
+      transaction.sign(privateKey);
+      //sending transacton via web3js module
+      const transactionHash = await web3js.eth.sendSignedTransaction(
+        '0x' + transaction.serialize().toString('hex'),
+      ); // .on('transactionHash', console.log);
+      console.log(transactionHash);
 
-    const common = Common.forCustomChain(
-      'mainnet',
-      {
-        name: 'matic-mumbai', //polygon-mainnet
-        networkId: 80001, //137
-        chainId: 80001, //137
-      },
-      'petersburg',
-    );
+      if (transactionHash?.status === true) {
+        if (
+          transactionHash.transactionHash !== '' ||
+          transactionHash.transactionHash !== null ||
+          transactionHash.transactionHash !== undefined
+        ) {
+          // console.log('Final return : ' + transactionHash.transactionHash);
+          return transactionHash.transactionHash;
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
 
-    const transaction = new Tx(rawTransaction, {
-      common,
+      // contract.methods
+      //   .balanceOf(myAddress)
+      //   .call()
+      // .then(function (balance) {
+      //   console.log(web3.utils.fromWei(balance, 'finney'));
+      // });
     });
-    //signing transaction with private key
-    transaction.sign(privateKey);
-    //sending transacton via web3js module
-    const transactionHash = await web3js.eth.sendSignedTransaction(
-      '0x' + transaction.serialize().toString('hex'),
-    ); // .on('transactionHash', console.log);
-    console.log(transactionHash);
-
-    if (transactionHash?.status === true) {
-      console.log('transactionHash status true');
-      return transactionHash?.transactionHash;
-    } else {
-      return null;
-    }
-
-    // contract.methods
-    //   .balanceOf(myAddress)
-    //   .call()
-    // .then(function (balance) {
-    //   console.log(web3.utils.fromWei(balance, 'finney'));
-    // });
-  });
+  return hash;
 };
