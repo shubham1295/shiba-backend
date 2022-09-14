@@ -109,8 +109,8 @@ export class UserDetailsService {
       "name": "${user.name}",
       "email": "${user.email}",
       "hash": "${hash.digest('hex')}",
-      "surl": "https://shibapubg.herokuapp.com/successPage",
-      "furl": "https://shibapubg.herokuapp.com/failPage"
+      "surl": "https://shibapubg.herokuapp.com/user-details/successPage",
+      "furl": "https://shibapubg.herokuapp.com/user-details/failPage"
     }`;
 
       let success = true;
